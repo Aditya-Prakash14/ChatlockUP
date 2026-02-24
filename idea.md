@@ -1,276 +1,152 @@
-# ChatlockUP
+# ChatlockUP – Project Idea
 
 ## Privacy-First End-to-End Encrypted Messaging Platform
 
 ---
 
-# 1. Executive Summary
+## 1. What We Are Building
 
-ChatlockUP is a privacy-focused, end-to-end encrypted messaging platform built using React (TypeScript), Node.js (TypeScript), and MongoDB.
+ChatlockUP is a **full-stack, real-time, end-to-end encrypted (E2EE) messaging application** where the server never has access to plaintext messages. Users authenticate using cryptographic key pairs — no phone number or email required.
 
-The system ensures:
-
-- No plaintext message storage
-- No phone number or email requirement
-- Client-side encryption only
-- Cryptographic identity-based authentication
-- Minimal metadata retention
-
-ChatlockUP is inspired by privacy-first platforms like Session and modern encryption principles used in Signal, but implemented using a modern full-stack TypeScript architecture.
+The backend is the primary focus, built with **OOP principles**, **clean architecture** (Controller → Service → Repository), and **design patterns** applied where they naturally fit.
 
 ---
 
-# 2. Problem Statement
+## 2. Project Scope
 
-Most existing messaging platforms:
+### In Scope (Phase 1 – Core Deliverable)
 
-- Require phone numbers or emails
-- Store sensitive metadata
-- Operate on centralized infrastructure
-- Become high-value breach targets
-- Sometimes retain message backups in readable formats
+| Area | What's Included |
+|------|-----------------|
+| **Authentication** | Key-pair based registration & login (no password), JWT session management |
+| **1:1 Messaging** | Real-time encrypted messaging via WebSockets |
+| **Encryption** | Client-side ECDH key exchange + AES-GCM encryption/decryption |
+| **Message Storage** | Server stores ciphertext only — zero plaintext |
+| **Offline Delivery** | Store-and-forward for offline recipients |
+| **Delivery Status** | Sent → Delivered → Read acknowledgments |
+| **User Discovery** | Search users by display name or userId |
+| **Conversations** | List conversations, fetch message history (encrypted) |
 
-Users today need:
+### Out of Scope (Future Phases)
 
-- Anonymous digital identity
-- True end-to-end encryption
-- Protection against server compromise
-- Control over private cryptographic keys
-
----
-
-# 3. Solution Overview
-
-ChatlockUP ensures:
-
-- Encryption happens entirely on the client
-- Server never sees plaintext
-- Identity is cryptographic (public key derived)
-- Messages are stored only as encrypted blobs
-- Private keys never leave user devices
-
-Core Principle:
-
-> If the server is compromised, attackers still cannot read messages.
+- Group chat encryption
+- Double Ratchet / forward secrecy
+- Encrypted file sharing
+- Voice / video calling
+- Push notifications
+- Multi-device sync
 
 ---
 
-# 4. Core Features
+## 3. Key Features
 
-## 🔐 End-to-End Encryption (E2EE)
+### 3.1 Cryptographic Identity System
+- User identity derived from public key: `userId = SHA-256(publicKey)`
+- No email, no phone number, no password
+- Private key stored only on the client device (IndexedDB)
+- Login via signed challenge — server verifies using stored public key
 
-- ECDH key exchange
-- AES-GCM or ChaCha20-Poly1305 encryption
-- Web Crypto API implementation
-- Unique nonce per message
+### 3.2 End-to-End Encryption (E2EE)
+- **Key Exchange:** ECDH (Elliptic Curve Diffie-Hellman)
+- **Encryption:** AES-256-GCM with unique IV per message
+- **Implementation:** Web Crypto API (client-side only)
+- Server acts purely as a relay and ciphertext storage layer
 
----
+### 3.3 Real-Time Messaging
+- WebSocket-based bidirectional communication
+- Server routes encrypted payloads between connected clients
+- Offline messages queued in MongoDB and delivered on reconnect
+- Typing indicators and presence (online/offline) tracking
 
-## 🆔 Anonymous Identity System
+### 3.4 Delivery Acknowledgments
+- Three-state tracking: `sent` → `delivered` → `read`
+- Status updates propagated via WebSocket events
+- Persisted in database for consistency
 
-- No email required
-- No phone number required
-- User ID = SHA-256(publicKey)
-- Login via private key
-
----
-
-## 💬 Real-Time Encrypted Messaging
-
-- WebSocket-based communication
-- Encrypted message forwarding
-- Encrypted message storage
-
----
-
-## 🔄 Forward Secrecy (Phase 2)
-
-- Double Ratchet algorithm
-- Per-message key rotation
-- Protection against future key compromise
+### 3.5 Conversation Management
+- Automatic conversation creation on first message
+- Sorted by most recent activity
+- Encrypted last-message preview (encrypted client-side)
 
 ---
 
-## 🗑 Self-Destruct Messages (Optional)
+## 4. Technology Stack
 
-- Time-based expiration
-- Client-side deletion
-- Optional server cleanup
-
----
-
-## 📁 Encrypted File Sharing (Future Phase)
-
-- File encrypted before upload
-- Server stores only encrypted file
-- Client-side decryption
-
----
-
-# 5. Target Users
-
-- Privacy-conscious individuals
-- Journalists
-- Developers
-- Cybersecurity professionals
-- Activists
-- Organizations requiring secure communication
+| Layer | Technology |
+|-------|------------|
+| **Frontend** | React + TypeScript, Vite, Web Crypto API, IndexedDB |
+| **Backend** | Node.js + TypeScript, Express.js |
+| **Real-Time** | WebSocket (ws library) |
+| **Database** | MongoDB |
+| **ORM** | Drizzle ORM |
+| **Auth** | JWT (jsonwebtoken) |
+| **Caching/Pub-Sub** | Redis (for multi-instance WebSocket scaling) |
+| **Infrastructure** | Docker, Nginx (reverse proxy), TLS 1.3 |
 
 ---
 
-# 6. Technical Architecture
+## 5. Backend Architecture Highlights
 
-## Frontend
+The backend is structured following **clean architecture** with clear separation of concerns:
 
-- React (TypeScript)
-- Web Crypto API
-- IndexedDB (private key storage)
-- WebSocket client
+```
+src/
+├── controllers/     # HTTP request handling, input validation
+├── services/        # Business logic, orchestration
+├── repositories/    # Data access layer (Drizzle ORM)
+├── models/          # Drizzle schema definitions
+├── middleware/      # Auth, rate limiting, error handling
+├── websocket/       # WebSocket event handlers
+├── utils/           # Helpers, crypto utilities
+├── config/          # Environment, database config
+└── types/           # TypeScript interfaces & types
+```
 
-## Backend
+### OOP Principles Applied
+- **Encapsulation:** Each layer exposes only what's needed (service methods, repository queries)
+- **Abstraction:** Repository pattern abstracts database access from business logic
+- **Inheritance:** Base classes for common controller/service behavior
+- **Polymorphism:** Strategy pattern for message delivery (online vs. offline)
 
-- Node.js (TypeScript)
-- Express or Fastify
-- WebSocket server
-- MongoDB
-- Drizzle ORM
-- Redis (optional for scaling)
-
----
-
-# 7. System Flow
-
-## User Registration
-
-1. Client generates key pair.
-2. Public key is sent to server.
-3. Server stores public key.
-4. Private key stored securely on client.
-
----
-
-## Sending a Message
-
-1. Fetch recipient public key.
-2. Derive shared secret using ECDH.
-3. Encrypt message locally.
-4. Send encrypted payload to server.
-5. Server forwards encrypted blob.
-6. Recipient decrypts locally.
-
-Server responsibilities:
-
-- Store encrypted data
-- Forward encrypted messages
-- Never decrypt or access plaintext
+### Design Patterns Used (where they fit naturally)
+- **Repository Pattern** — decouple data access from business logic
+- **Strategy Pattern** — message delivery strategy (real-time vs. store-and-forward)
+- **Singleton Pattern** — database connection, WebSocket server instance
+- **Observer Pattern** — WebSocket event system (pub/sub for presence, typing)
+- **Factory Pattern** — creating response objects, error objects
 
 ---
 
-# 8. Database Design
-
-## Users Collection
-
-- userId
-- publicKey
-- createdAt
-
-## Messages Collection
-
-- senderId
-- receiverId
-- ciphertext
-- iv
-- timestamp
-
-No plaintext is stored.
-
----
-
-# 9. Security Model
+## 6. Security Model
 
 | Threat | Mitigation |
 |--------|------------|
-| Server Breach | Only ciphertext stored |
-| MITM Attack | Public key verification |
-| Replay Attack | Nonce + timestamp validation |
-| Key Theft | Forward secrecy implementation |
-| Database Leak | Encrypted blobs only |
+| Server Breach | Only ciphertext stored — no plaintext ever |
+| MITM Attack | Public key verification + TLS 1.3 |
+| Replay Attack | Unique IV (nonce) + timestamp validation |
+| Key Theft | Private keys never leave client device |
+| Database Leak | Encrypted blobs only — useless without private keys |
+| Brute Force | Rate limiting (60 msgs/min per user) |
+
+> **Core Principle:** If the server is fully compromised, attackers still cannot read any messages.
 
 ---
 
-# 10. Competitive Advantage
+## 7. Target Users
 
-| Feature | CipherChat | WhatsApp | Telegram |
-|----------|------------|-----------|------------|
-| No Phone Required | ✅ | ❌ | ❌ |
-| Server Cannot Read Messages | ✅ | ✅ | ❌ (cloud chats) |
-| Cryptographic Identity | ✅ | ❌ | ❌ |
-| Metadata Minimization | ✅ | ❌ | ❌ |
+- Privacy-conscious individuals
+- Journalists and activists
+- Developers and cybersecurity professionals
+- Organizations needing secure internal communication
 
 ---
 
-# 11. Roadmap
+## 8. Scoring Alignment
 
-## Phase 1
-
-- 1-to-1 encrypted messaging
-- Anonymous login
-- WebSocket real-time communication
-
-## Phase 2
-
-- Double Ratchet implementation
-- Group chat encryption
-- Public key fingerprint verification
-
-## Phase 3
-
-- Onion routing
-- Decentralized relay nodes
-- Zero-knowledge server architecture
-
----
-
-# 12. Scalability Plan
-
-- Horizontal scaling of WebSocket servers
-- Redis session coordination
-- MongoDB sharding
-- Load balancing
-- Microservice migration
-
----
-
-# 13. Monetization Strategy (Optional)
-
-- Encrypted team collaboration plans
-- Enterprise secure communication
-- Premium private workspaces
-- On-premise enterprise deployments
-
----
-
-# 14. Vision Statement
-
-To build a communication platform where privacy is not a feature — it is the foundation.
-
----
-
-# 15. Technology Stack Summary
-
-Frontend: React + TypeScript  
-Backend: Node.js + TypeScript  
-Database: MongoDB  
-ORM: Drizzle ORM  
-Communication: WebSockets  
-Encryption: Web Crypto API  
-
----
-
-# 16. Future Expansion Ideas
-
-- Encrypted voice messaging
-- Encrypted video calling
-- Secure group channels
-- Private key hardware integration
-- Zero-knowledge architecture upgrade
+| Criteria | How ChatlockUP Addresses It |
+|----------|----------------------------|
+| **Backend (75%)** | Clean Controller → Service → Repository architecture, OOP, design patterns, WebSocket handling, JWT auth, Drizzle ORM |
+| **Frontend (25%)** | React UI for chat, encryption/decryption via Web Crypto API, IndexedDB key management |
+| **Regular Commits** | Feature-by-feature incremental development |
+| **OOP Principles** | Encapsulation, abstraction, inheritance, polymorphism throughout backend |
+| **Design Patterns** | Repository, Strategy, Singleton, Observer, Factory — used where they naturally fit |

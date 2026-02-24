@@ -2,7 +2,7 @@
 
 ## 1. Overview
 
-CipherChat is a secure, real-time messaging platform built with **end-to-end encryption (E2EE)**.  
+ChatlockUP is a secure, real-time messaging platform built with **end-to-end encryption (E2EE)**.  
 Messages are encrypted on the client and decrypted only on the recipient's device.  
 The server never has access to plaintext messages.
 
@@ -181,5 +181,5 @@ Cons:
 
 ## 14. Conclusion
 
-CipherChat is a secure, scalable, production-ready encrypted messaging platform.  
+ChatlockUP is a secure, scalable, production-ready encrypted messaging platform.  
 The system ensures that only communicating users can read messages, while the server acts solely as a relay and storage layer for encrypted data.
