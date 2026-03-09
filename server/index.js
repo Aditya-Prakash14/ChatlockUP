@@ -90,7 +90,7 @@ io.on('connection', (socket) => {
 });
 
 // ── Start ──
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT;
 
 initDB()
   .then(() => {

@@ -1,6 +1,11 @@
 const jwt = require('jsonwebtoken');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'change-this-secret';
+if (!process.env.JWT_SECRET) {
+  console.error('JWT_SECRET is not set. Check your .env file.');
+  process.exit(1);
+}
+
+const JWT_SECRET = process.env.JWT_SECRET;
 
 function verifyToken(req, res, next) {
   const header = req.headers.authorization;
