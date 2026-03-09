@@ -12,6 +12,9 @@ client/build/
 server/.env
 client/.env
 
+# Prisma generated client
+server/generated/
+
 # OS files
 .DS_Store
 Thumbs.db

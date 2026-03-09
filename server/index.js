@@ -8,7 +8,7 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 
-const { initDB } = require('./db');
+const { prisma } = require('./db');
 const authRoutes = require('./routes/auth');
 const keysRoutes = require('./routes/keys');
 const User = require('./models/User');
@@ -92,12 +92,12 @@ io.on('connection', (socket) => {
 // ── Start ──
 const PORT = process.env.PORT;
 
-initDB()
+prisma.$connect()
   .then(() => {
-    console.log('PostgreSQL tables ready');
+    console.log('Prisma connected to PostgreSQL');
     httpServer.listen(PORT, () => console.log(`Server running on :${PORT}`));
   })
   .catch((err) => {
-    console.error('DB init failed:', err);
+    console.error('DB connection failed:', err);
     process.exit(1);
   });

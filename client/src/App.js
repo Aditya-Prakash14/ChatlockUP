@@ -3,6 +3,7 @@ import { io } from 'socket.io-client';
 import axios from 'axios';
 import ContactList from './components/ContactList';
 import ChatWindow from './components/ChatWindow';
+import ThemeToggle from './components/ThemeToggle';
 import { generateKeyPair, deriveSharedKey } from './crypto/keys';
 import { encryptMessage, decryptMessage } from './crypto/messaging';
 import {
@@ -20,7 +21,22 @@ import './App.css';
 const API = process.env.REACT_APP_API_URL || 'http://localhost:3001';
 const socket = io(API, { autoConnect: false });
 
+function useTheme() {
+  const [theme, setTheme] = useState(() => {
+    return localStorage.getItem('chatlockup_theme') || 'light';
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('chatlockup_theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => setTheme((t) => (t === 'light' ? 'dark' : 'light'));
+  return { theme, toggleTheme };
+}
+
 function App() {
+  const { theme, toggleTheme } = useTheme();
   const [screen, setScreen] = useState(loadToken() ? 'chat' : 'auth');
   const [username, setUsername] = useState(loadUsername() || '');
   const [password, setPassword] = useState('');
@@ -200,9 +216,12 @@ function App() {
   if (screen === 'auth') {
     return (
       <div className="auth-screen">
+        <div className="auth-theme-toggle">
+          <ThemeToggle theme={theme} onToggle={toggleTheme} />
+        </div>
         <div className="auth-card">
           <div className="auth-logo">
-            <span className="logo-icon">🔒</span>
+            <div className="logo-icon">🔒</div>
             <h1>ChatlockUP</h1>
             <p>End-to-end encrypted messaging</p>
           </div>
@@ -247,7 +266,10 @@ function App() {
               <div className="user-status">Online</div>
             </div>
           </div>
-          <button className="btn-logout" onClick={handleLogout}>Logout</button>
+          <div className="sidebar-actions">
+            <ThemeToggle theme={theme} onToggle={toggleTheme} />
+            <button className="btn-logout" onClick={handleLogout}>Logout</button>
+          </div>
         </div>
         <ContactList
           contacts={contacts}
