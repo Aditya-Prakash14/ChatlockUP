@@ -28,6 +28,8 @@ const io = new Server(httpServer, {
     origin: ALLOWED_ORIGINS,
     methods: ['GET', 'POST']
   },
+    transports: ['polling', 'websocket'],
+    allowEIO3: true,
   pingTimeout: 60000,
   pingInterval: 25000
 });
