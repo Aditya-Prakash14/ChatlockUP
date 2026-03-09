@@ -251,7 +251,12 @@ function App() {
         </div>
         <div className="auth-card">
           <div className="auth-logo">
-            <div className="logo-icon">🔒</div>
+            <div className="logo-icon">
+              <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+            </div>
             <h1>ChatlockUP</h1>
             <p>End-to-end encrypted messaging</p>
           </div>

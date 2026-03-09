@@ -21,7 +21,11 @@ export default function ChatWindow({ messages, onSend, activeContact, onBack }) 
     return (
       <div className="chat-main">
         <div className="chat-empty">
-          <span className="empty-icon">💬</span>
+          <span className="empty-icon">
+            <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+            </svg>
+          </span>
           <h2>Your messages</h2>
           <p>Select a conversation from the sidebar or add a new contact to get started.</p>
         </div>
@@ -45,7 +49,13 @@ export default function ChatWindow({ messages, onSend, activeContact, onBack }) 
             <div className="header-status">End-to-end encrypted</div>
           </div>
         </div>
-        <div className="e2e-badge">🔒 E2E Encrypted</div>
+        <div className="e2e-badge">
+          <svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+          E2E Encrypted
+        </div>
       </div>
 
       <div className="messages-area">
