@@ -20,7 +20,7 @@ import {
 } from './crypto/storage';
 import './App.css';
 
-const API = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+const API = process.env.REACT_APP_API_URL || 'https://chatlock-up.vercel.app';
 const socket = io(API, {
   autoConnect: false,
   transports: ['websocket', 'polling'],
