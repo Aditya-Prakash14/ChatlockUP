@@ -295,6 +295,20 @@
   display: inline-block;
 }
 
+.user-info .user-status.offline {
+  color: var(--error, #ef4444);
+}
+
+.user-info .user-status.offline::before {
+  background: var(--error, #ef4444);
+  animation: blink 1.2s infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
 .sidebar-actions {
   display: flex;
   align-items: center;

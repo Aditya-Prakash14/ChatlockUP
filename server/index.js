@@ -16,7 +16,21 @@ const Message = require('./models/Message');
 
 const app = express();
 const httpServer = createServer(app);
-const io = new Server(httpServer, { cors: { origin: '*' } });
+
+const ALLOWED_ORIGINS = [
+  'http://localhost:3000',
+  'https://chatlock-up.vercel.app',
+  process.env.CLIENT_URL
+].filter(Boolean);
+
+const io = new Server(httpServer, {
+  cors: {
+    origin: ALLOWED_ORIGINS,
+    methods: ['GET', 'POST']
+  },
+  pingTimeout: 60000,
+  pingInterval: 25000
+});
 
 // ── Security middleware ──
 app.use(helmet());
@@ -24,8 +38,11 @@ app.use(rateLimit({
   windowMs: 15 * 60 * 1000, // 15 min
   max: 100                   // max 100 requests per window
 }));
-app.use(cors());
+app.use(cors({ origin: ALLOWED_ORIGINS }));
 app.use(express.json());
+
+// ── Health check ──
+app.get('/', (req, res) => res.json({ status: 'ok', service: 'chatlockup-api' }));
 
 // ── REST routes ──
 app.use('/api/auth', authRoutes);
@@ -90,7 +107,7 @@ io.on('connection', (socket) => {
 });
 
 // ── Start ──
-const PORT = process.env.PORT;
+const PORT = process.env.PORT || 3001;
 
 prisma.$connect()
   .then(() => {

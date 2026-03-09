@@ -20,8 +20,16 @@ import {
 } from './crypto/storage';
 import './App.css';
 
-const API = process.env.REACT_APP_API_URL || 'https://chatlock-up.vercel.app';
-const socket = io(API, { autoConnect: false });
+const API = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+const socket = io(API, {
+  autoConnect: false,
+  transports: ['websocket', 'polling'],
+  reconnection: true,
+  reconnectionAttempts: 10,
+  reconnectionDelay: 1000,
+  reconnectionDelayMax: 5000,
+  timeout: 20000,
+});
 
 function useTheme() {
   const [theme, setTheme] = useState(() => {
@@ -49,6 +57,7 @@ function App() {
   const sharedKeys = useRef(loadSharedKeys());
   const [showProfile, setShowProfile] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
+  const [connected, setConnected] = useState(false);
 
   // ── Connect socket on login ──
   useEffect(() => {
@@ -58,7 +67,24 @@ function App() {
     socket.connect();
     socket.emit('register', loadUsername());
 
-    return () => { socket.disconnect(); };
+    const onConnect = () => {
+      setConnected(true);
+      // Re-register on reconnect so server knows our socket id
+      socket.emit('register', loadUsername());
+    };
+    const onDisconnect = () => setConnected(false);
+    const onError = (err) => console.error('Socket error:', err);
+
+    socket.on('connect', onConnect);
+    socket.on('disconnect', onDisconnect);
+    socket.on('connect_error', onError);
+
+    return () => {
+      socket.off('connect', onConnect);
+      socket.off('disconnect', onDisconnect);
+      socket.off('connect_error', onError);
+      socket.disconnect();
+    };
   }, [screen]);
 
   // ── Listen for incoming messages ──
@@ -268,7 +294,9 @@ function App() {
             <div className="user-avatar">{initial}</div>
             <div>
               <div className="user-name">{currentUser}</div>
-              <div className="user-status">Online</div>
+              <div className={`user-status ${connected ? '' : 'offline'}`}>
+                {connected ? 'Online' : 'Reconnecting…'}
+              </div>
             </div>
           </div>
           <div className="sidebar-actions">
