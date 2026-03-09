@@ -260,8 +260,9 @@ function App() {
 
   // ── Chat screen ──
   return (
-    <div className="chat-layout">
-      <div className="sidebar">
+    <div className="app-container mesh-bg">
+      <div className={`chat-layout ${activeContact ? 'has-active-chat' : ''}`}>
+        <div className="sidebar">
         <div className="sidebar-header">
           <div className="user-info" onClick={() => setShowProfile(true)} style={{ cursor: 'pointer' }}>
             <div className="user-avatar">{initial}</div>
@@ -283,29 +284,32 @@ function App() {
           onOpenScanner={() => setShowScanner(true)}
           messages={messages}
         />
+        </div>
+
+        <ChatWindow
+          messages={messages[activeContact] || []}
+          onSend={handleSend}
+          activeContact={activeContact}
+          onBack={() => setActiveContact(null)}
+        />
+
+        {showProfile && (
+          <UserProfile
+            username={currentUser}
+            onClose={() => setShowProfile(false)}
+          />
+        )}
+
+        {showScanner && (
+          <QrScanner
+            onScan={(name) => {
+              setShowScanner(false);
+              handleAddContact(name);
+            }}
+            onClose={() => setShowScanner(false)}
+          />
+        )}
       </div>
-      <ChatWindow
-        messages={messages[activeContact] || []}
-        onSend={handleSend}
-        activeContact={activeContact}
-      />
-
-      {showProfile && (
-        <UserProfile
-          username={currentUser}
-          onClose={() => setShowProfile(false)}
-        />
-      )}
-
-      {showScanner && (
-        <QrScanner
-          onScan={(name) => {
-            setShowScanner(false);
-            handleAddContact(name);
-          }}
-          onClose={() => setShowScanner(false)}
-        />
-      )}
     </div>
   );
 }
