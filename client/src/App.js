@@ -4,6 +4,8 @@ import axios from 'axios';
 import ContactList from './components/ContactList';
 import ChatWindow from './components/ChatWindow';
 import ThemeToggle from './components/ThemeToggle';
+import UserProfile from './components/UserProfile';
+import QrScanner from './components/QrScanner';
 import { generateKeyPair, deriveSharedKey } from './crypto/keys';
 import { encryptMessage, decryptMessage } from './crypto/messaging';
 import {
@@ -45,6 +47,8 @@ function App() {
   const [activeContact, setActiveContact] = useState(null);
   const [messages, setMessages] = useState(() => loadMessages());
   const sharedKeys = useRef(loadSharedKeys());
+  const [showProfile, setShowProfile] = useState(false);
+  const [showScanner, setShowScanner] = useState(false);
 
   // ── Connect socket on login ──
   useEffect(() => {
@@ -259,7 +263,7 @@ function App() {
     <div className="chat-layout">
       <div className="sidebar">
         <div className="sidebar-header">
-          <div className="user-info">
+          <div className="user-info" onClick={() => setShowProfile(true)} style={{ cursor: 'pointer' }}>
             <div className="user-avatar">{initial}</div>
             <div>
               <div className="user-name">{currentUser}</div>
@@ -276,6 +280,7 @@ function App() {
           activeContact={activeContact}
           onSelect={setActiveContact}
           onAddContact={handleAddContact}
+          onOpenScanner={() => setShowScanner(true)}
           messages={messages}
         />
       </div>
@@ -284,6 +289,23 @@ function App() {
         onSend={handleSend}
         activeContact={activeContact}
       />
+
+      {showProfile && (
+        <UserProfile
+          username={currentUser}
+          onClose={() => setShowProfile(false)}
+        />
+      )}
+
+      {showScanner && (
+        <QrScanner
+          onScan={(name) => {
+            setShowScanner(false);
+            handleAddContact(name);
+          }}
+          onClose={() => setShowScanner(false)}
+        />
+      )}
     </div>
   );
 }
