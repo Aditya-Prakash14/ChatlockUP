@@ -1,11 +1,11 @@
 const express = require('express');
 const User = require('../models/User');
-const { verifyToken } = require('../middleware/auth');
+const { verifyTokenMiddleware } = require('../middleware/auth');
 
 const router = express.Router();
 
 // Get a user's public key by username
-router.get('/:username', verifyToken, async (req, res) => {
+router.get('/:username', verifyTokenMiddleware, async (req, res) => {
   try {
     const user = await User.findByUsername(req.params.username);
     if (!user) {
@@ -18,7 +18,7 @@ router.get('/:username', verifyToken, async (req, res) => {
 });
 
 // Update own public key
-router.put('/', verifyToken, async (req, res) => {
+router.put('/', verifyTokenMiddleware, async (req, res) => {
   try {
     const { publicKey } = req.body;
     if (!publicKey) {

@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: chatlockup-backend
+    runtime: node
+    plan: starter
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3001
+      - key: DATABASE_URL
+        fromDatabase:
+          name: chatlockup-db
+          property: connectionString
+      - key: JWT_SECRET
+        sync: false
+      - key: CLIENT_URL
+        sync: false
+
+databases:
+  - name: chatlockup-db
+    plan: starter
+    databaseName: chatlockup_prod
+    user: chatlockup_user
+    region: Oregon

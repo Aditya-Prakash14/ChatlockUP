@@ -65,12 +65,12 @@ function App() {
     const token = loadToken();
     if (!token) return;
     socket.connect();
-    socket.emit('register', loadUsername());
+    socket.emit('register', { username: loadUsername(), token });
 
     const onConnect = () => {
       setConnected(true);
       // Re-register on reconnect so server knows our socket id
-      socket.emit('register', loadUsername());
+      socket.emit('register', { username: loadUsername(), token: loadToken() });
     };
     const onDisconnect = () => setConnected(false);
     const onError = (err) => console.error('Socket error:', err);
