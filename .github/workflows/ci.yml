@@ -1,0 +1,131 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  server:
+    name: Server (Node.js)
+    runs-on: ubuntu-latest
+    
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_DB: chatlockup_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x, 22.x]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: server/package-lock.json
+      
+      - name: Install server dependencies
+        working-directory: server
+        run: npm ci
+      
+      - name: Generate Prisma Client
+        working-directory: server
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/chatlockup_test
+        run: npx prisma generate
+      
+      - name: Run database migrations
+        working-directory: server
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/chatlockup_test
+        run: npx prisma migrate deploy
+      
+      - name: Lint server code
+        working-directory: server
+        run: npm run lint --if-present
+      
+      - name: Run server tests
+        working-directory: server
+        env:
+          DATABASE_URL: postgresql://postgres:postgres@localhost:5432/chatlockup_test
+          JWT_SECRET: test_secret_key_for_ci
+          NODE_ENV: test
+        run: npm test --if-present
+
+  client:
+    name: Client (React)
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x, 22.x]
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+          cache-dependency-path: client/package-lock.json
+      
+      - name: Install client dependencies
+        working-directory: client
+        run: npm ci
+      
+      - name: Lint client code
+        working-directory: client
+        run: npm run lint --if-present
+      
+      - name: Run client tests
+        working-directory: client
+        run: npm test --passWithNoTests --coverage --watchAll=false
+      
+      - name: Build client
+        working-directory: client
+        env:
+          CI: true
+          REACT_APP_API_URL: https://api.example.com
+        run: npm run build
+
+  security:
+    name: Security Audit
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      
+      - name: Audit server dependencies
+        working-directory: server
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
+      
+      - name: Audit client dependencies
+        working-directory: client
+        run: npm audit --audit-level=moderate
+        continue-on-error: true

@@ -1,0 +1,34 @@
+# Dependencies
+node_modules
+/.pnp
+.pnp.js
+
+# Production builds
+/build
+/dist
+/.next
+
+# Environment files
+.env
+.env.local
+.env.*.local
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Coverage
+/coverage
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db

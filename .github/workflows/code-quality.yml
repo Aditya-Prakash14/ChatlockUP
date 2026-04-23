@@ -1,0 +1,83 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+jobs:
+  eslint:
+    name: ESLint
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          cache: 'npm'
+      
+      - name: Install server dependencies
+        working-directory: server
+        run: npm ci
+      
+      - name: Install ESLint for server
+        working-directory: server
+        run: npm install --save-dev eslint eslint-config-prettier eslint-plugin-prettier prettier
+        continue-on-error: true
+      
+      - name: Lint server code
+        working-directory: server
+        run: npm run lint --if-present || npx eslint . --max-warnings 0
+        continue-on-error: true
+      
+      - name: Install client dependencies
+        working-directory: client
+        run: npm ci
+      
+      - name: Lint client code
+        working-directory: client
+        run: npm run lint --if-present || npm run build
+        continue-on-error: true
+
+  format-check:
+    name: Code Format (Prettier)
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      
+      - name: Install Prettier
+        run: npm install -g prettier
+      
+      - name: Check code format
+        run: prettier --check .
+        continue-on-error: true
+
+  dependency-check:
+    name: Dependency Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+      
+      - name: Check for npm vulnerabilities
+        run: |
+          cd server && npm audit --audit-level=moderate || true
+          cd ../client && npm audit --audit-level=moderate || true

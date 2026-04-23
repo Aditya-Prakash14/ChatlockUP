@@ -1,0 +1,100 @@
+name: PR Checks
+
+on:
+  pull_request:
+    branches: [main, develop]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  pr-validation:
+    name: Validate PR
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Validate PR title
+        uses: deepakputra/action-pr-title@master
+        with:
+          regex: '^(feat|fix|docs|style|refactor|perf|test|chore|ci|build)(\(.+\))?!?: .{10,}'
+          allowed_prefixes: 'feat,fix,docs,style,refactor,perf,test,chore,ci,build'
+          disallowed_prefixes: 'wip,temp'
+        continue-on-error: true
+      
+      - name: Validate branch name
+        run: |
+          BRANCH_NAME="${GITHUB_HEAD_REF}"
+          if [[ ! $BRANCH_NAME =~ ^(feature|fix|docs|refactor|hotfix|dev)\/[a-z0-9_-]+$ ]]; then
+            echo "⚠️ Branch name '$BRANCH_NAME' doesn't follow convention: (feature|fix|docs|refactor|hotfix|dev)/<name>"
+            echo "Recommendation: feature/user-auth, fix/websocket-bug, etc."
+          fi
+        continue-on-error: true
+      
+      - name: Check for large changes
+        run: |
+          ADDED=$(git diff origin/main...HEAD --stat | tail -1 | awk '{print $4}')
+          if [ "$ADDED" -gt 500 ]; then
+            echo "⚠️ Large changes detected ($ADDED lines). Consider breaking into smaller PRs."
+          fi
+        continue-on-error: true
+      
+      - name: Check commit messages
+        run: |
+          COMMITS=$(git rev-list origin/main...HEAD)
+          for commit in $COMMITS; do
+            MSG=$(git log -1 --format=%B $commit)
+            if [[ ! $MSG =~ ^[A-Z] ]]; then
+              echo "⚠️ Commit '$commit' doesn't start with capital letter"
+            fi
+          done
+        continue-on-error: true
+      
+      - name: Comment PR with checklist
+        uses: actions/github-script@v7
+        if: github.event.action == 'opened'
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `## PR Checklist
+              
+              - [ ] Tests added/updated
+              - [ ] Documentation updated
+              - [ ] No breaking changes
+              - [ ] Follows code style
+              - [ ] Security review passed
+              
+              **CI will run automatically. Check back in a few moments.**`
+            })
+
+  changed-files:
+    name: Check Modified Files
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v42
+        with:
+          files: |
+            server/**
+            client/**
+            .github/workflows/**
+      
+      - name: Summarize changes
+        run: |
+          echo "## Files Changed"
+          echo "${{ steps.changed-files.outputs.all_changed_files }}"
+        if: steps.changed-files.outputs.any_changed == 'true'
