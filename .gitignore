@@ -1,31 +1,194 @@
-# Dependencies
+# ============================================================================
+# DEPENDENCIES
+# ============================================================================
 node_modules/
+.pnp
+.pnp.js
 
-# Build output
+# ============================================================================
+# BUILD & DISTRIBUTION
+# ============================================================================
+build/
 dist/
+.next/
+out/
 client/build/
+server/dist/
 
-# Environment variables
+# ============================================================================
+# ENVIRONMENT VARIABLES (NEVER COMMIT SECRETS)
+# ============================================================================
 .env
 .env.local
+.env.development.local
+.env.test.local
+.env.production.local
 .env.*.local
 server/.env
 client/.env
+.env.example.local
 
-# Prisma generated client
+# ============================================================================
+# PRISMA
+# ============================================================================
+server/prisma/migrations/*
+!server/prisma/migrations/.gitkeep
 server/generated/
+.prisma/
 
-# OS files
+# ============================================================================
+# LOGS
+# ============================================================================
+logs/
+*.log
+*.logs
+npm-debug.log*
+npm-error.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+.pnpm-debug.log*
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+.mocharc.json
+.nyc_output/
+
+# ============================================================================
+# TESTING
+# ============================================================================
+/coverage
+*.lcov
+.nyc_output
+
+# ============================================================================
+# OS FILES
+# ============================================================================
 .DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
 Thumbs.db
+desktop.ini
 
-# IDE
+# ============================================================================
+# IDE & EDITOR
+# ============================================================================
 .vscode/
 .idea/
+.atom/
+.sublime-project
+.sublime-workspace
+*.swp
+*.swo
+*~
+.project
+.classpath
+.c9/
+*.launch
+.settings/
+*.sublime-workspace
+.vscode-test-web/
 
-# Logs
-*.log
-npm-debug.log*
+# ============================================================================
+# TEMPORARY FILES
+# ============================================================================
+tmp/
+temp/
+*.tmp
+*.bak
+*.swp
+*.orig
+*~
+.DS_Store
 
-# TypeScript cache
+# ============================================================================
+# YARN / NPM / PNPM
+# ============================================================================
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnpm-store/
+.npm
+.eslintcache
+.node_repl_history
 *.tsbuildinfo
+
+# ============================================================================
+# DATABASE
+# ============================================================================
+*.db
+*.sqlite
+*.sqlite3
+*.pgsql
+.pgpass
+
+# ============================================================================
+# DOCKER
+# ============================================================================
+.dockerignore
+.docker/
+volumes/
+data/
+
+# ============================================================================
+# CI/CD
+# ============================================================================
+.github/workflows/artifacts/
+.gitlab-ci-local/
+.circleci/
+
+# ============================================================================
+# PRODUCTION
+# ============================================================================
+.env.production
+.env.production.local
+
+# ============================================================================
+# SECURITY
+# ============================================================================
+.ssh/
+*.pem
+*.key
+*.crt
+*.cert
+private_keys/
+secrets/
+
+# ============================================================================
+# MISC
+# ============================================================================
+.env.example
+.npmrc
+.yarnrc
+*.pid
+*.pid.lock
+.angular/
+.cache/
+.parcel-cache
+.next
+out
+build
+dist
+.cache/
+.vuepress/dist
+.serverless/
+.fusebox/
+.dynamodb/
+.tern-port
+.vscode-test
+.yarn/install-state.gz
+.env.development.local
